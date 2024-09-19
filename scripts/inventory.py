@@ -8,9 +8,43 @@ import urllib3
 # Отключаем предупреждения о небезопасном HTTPS
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+def extract_ansible_vars(variables):
+    """Простая функция для извлечения ansible_host и ansible_user из строки"""
+    ansible_host = None
+    ansible_user = None
+
+
+    # Проходим по каждой строке переменных
+    for line in variables.splitlines():
+        # Если строка содержит ansible_host, извлекаем значение
+        if line.startswith("ansible_host:"):
+            ansible_host = line.split(":")[1].strip()
+        # Если строка содержит ansible_user, извлекаем значение
+        if line.startswith("ansible_user:"):
+            ansible_user = line.split(":")[1].strip()
+
+    return ansible_host, ansible_user
+
+def fetch_host_details(host_id, api_token):
+    """Получение данных о хосте, таких как ansible_host и ansible_user"""
+    host_url = f"https://10.177.185.87/api/v2/hosts/{host_id}/"
+    headers = {
+        "Authorization": f"Bearer {api_token}"
+    }
+    
+    # Запрос к API для получения данных о хосте
+    response = requests.get(host_url, headers=headers, verify=False)
+    host_data = response.json()
+
+    # Извлечение ansible_host и ansible_user из поля 'variables'
+    variables = host_data.get('variables', '')
+    ansible_host, ansible_user = extract_ansible_vars(variables)
+
+    return ansible_host, ansible_user
+
 def fetch_inventory():
+    """Получение информации о последней джобе и хостах"""
     # Получение токена из переменной окружения
-    # api_token = os.getenv('AWX_API_TOKEN')
     api_token = 'nyR6ylhV85RVR1GnOU8B5rxI89GmNM'
 
     # ID шаблона (замените на реальный ID вашего шаблона)
@@ -55,6 +89,17 @@ def fetch_inventory():
     # Обрабатываем информацию о хостах
     for host_summary in job_host_summaries_data['results']:
         host_name = host_summary['summary_fields']['host']['name']
+        host_id = host_summary['summary_fields']['host']['id']
+        
+        # Получаем ansible_host и ansible_user для каждого хоста
+        ansible_host, ansible_user = fetch_host_details(host_id, api_token)
+
+        # Добавляем информацию в hostvars
+        inventory["_meta"]["hostvars"][host_name] = {
+            "ansible_host": ansible_host,
+            "ansible_user": ansible_user
+        }
+
         if host_summary['failed']:
             inventory["failed_hosts"]["hosts"].append(host_name)
         else:
