@@ -10,7 +10,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def fetch_inventory():
     # Получение токена из переменной окружения
-    api_token = os.getenv('AWX_API_TOKEN')
+    # api_token = os.getenv('AWX_API_TOKEN')
+    api_token = 'nyR6ylhV85RVR1GnOU8B5rxI89GmNM'
 
     # ID шаблона (замените на реальный ID вашего шаблона)
     template_id = 8
