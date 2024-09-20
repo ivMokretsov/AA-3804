@@ -11,8 +11,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Вынесенные переменные
 api_token = os.getenv('AWX_API_TOKEN')  # Токен берется из переменной окружения
-# template_id = os.getenv('AWX_TEMPLATE_ID')  # Template ID также может быть передано через переменную окружения
-template_id=''
+template_id = os.getenv('AWX_TEMPLATE_ID')  # Template ID также может быть передано через переменную окружения
 # Путь к локальному INI-файлу
 inventory_file_path = os.path.join(os.path.dirname(__file__), 'local_inventory.ini')
 
@@ -94,10 +93,8 @@ def fetch_inventory_from_awx(api_token, template_id):
 
     response = requests.get(api_url, headers=headers, verify=False)
     template_data = response.json()
-    print(template_data)
 
     if "last_job" not in template_data['related']:
-        print("Нет информации о последней джобе. Используется локальный инвентарь.")
         return load_inventory_from_file(inventory_file_path)
 
     last_job_url = template_data['related']['last_job']
@@ -135,7 +132,6 @@ def fetch_inventory_from_awx(api_token, template_id):
 def fetch_inventory():
     """Формирование инвентаря в зависимости от состояния"""
     if not template_id:
-        print("Template ID не задан. Используется локальный инвентарь.")
         return load_inventory_from_file(inventory_file_path)
     else:
         return fetch_inventory_from_awx(api_token, template_id)
