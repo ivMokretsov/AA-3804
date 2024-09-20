@@ -11,7 +11,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Вынесенные переменные
 api_token = os.getenv('AWX_API_TOKEN')  # Токен берется из переменной окружения
-# template_id = os.getenv('AWX_TEMPLATE_ID')  # Template ID также может быть передано через переменную окружения
+template_id = os.getenv('AWX_TEMPLATE_ID')  # Template ID также может быть передано через переменную окружения
 # Путь к локальному INI-файлу
 inventory_file_path = os.path.join(os.path.dirname(__file__), 'local_inventory.ini')
 
